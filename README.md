@@ -78,7 +78,7 @@ Go to GitHub, sign in, and create a new repository named techbit-blog.
 
 
 Push to GitHub:
-Link the local repository to GitHub and push:git remote add origin https://github.com/yourusername/techbit-blog.git
+Link the local repository to GitHub and push:git remote add origin https://github.com/beshah80/techbit-blog.git
 git branch -M main
 git push -u origin main
 
@@ -86,11 +86,11 @@ git push -u origin main
 
 
 Verify:
-Visit https://github.com/yourusername/techbit-blog to confirm index.html is uploaded.
+Visit https://github.com/beshah80/techbit-blog to confirm index.html is uploaded.
 
 
 Share:
-Share the repository URL (https://github.com/yourusername/techbit-blog) as required.
+Share the repository URL (https://github.com/beshah80/techbit-blog) as required.
 
 
 
