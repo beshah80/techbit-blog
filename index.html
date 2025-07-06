@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TechBit</title>
+  <style>
+    /* --- CSS: Professional Blog Style --- */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      color: #1a202c;
+      font-size: 2.5rem;
+      margin-bottom: 32px;
+    }
+    h2 {
+      color: #2d3748;
+      font-size: 1.5rem;
+      margin: 24px 0 16px;
+    }
+    .posts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .post-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .post-item:hover {
+      transform: translateY(-4px);
+    }
+    .post-title {
+      font-size: 1.4rem;
+      color: #2d3748;
+      margin-bottom: 12px;
+    }
+    .post-body {
+      color: #4a5568;
+      line-height: 1.6;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 40px;
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    input, textarea {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 1rem;
+      resize: vertical;
+    }
+    button {
+      background: #3182ce;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #2b6cb0;
+    }
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .comment-item {
+      background: #edf2f7;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .comment-name {
+      font-weight: bold;
+      color: #2b6cb0;
+      font-size: 1.1rem;
+    }
+    .delete-btn {
+      background: #e53e3e;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .delete-btn:hover {
+      background: #c53030;
+    }
+    @media (max-width: 700px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+      .post-item, .comment-item, form {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TechBit</h1>
+    <div class="posts-list" id="posts"></div>
+    <h2>Leave a Comment</h2>
+    <form id="comment-form" autocomplete="off">
+      <input type="text" id="name" placeholder="Your Name" required>
+      <textarea id="comment" rows="4" placeholder="Share your thoughts..." required></textarea>
+      <button type="submit">Post Comment</button>
+    </form>
+    <h2>Comments</h2>
+    <div class="comments-list" id="comments-list"></div>
+  </div>
+  <script>
+    // --- JS: Blog Page Logic ---
+
+    // Select DOM elements
+    const form = document.getElementById('comment-form');
+    const nameInput = document.getElementById('name');
+    const commentInput = document.getElementById('comment');
+    const commentsList = document.getElementById('comments-list');
+    const postsContainer = document.getElementById('posts');
+
+    // Store comments in an array
+    let comments = [];
+
+    // --- Utility: Save to localStorage ---
+    const saveComments = () => {
+      localStorage.setItem('comments', JSON.stringify(comments));
+    };
+
+    // --- Utility: Load from localStorage ---
+    const loadComments = () => {
+      const data = localStorage.getItem('comments');
+      return data ? JSON.parse(data) : [];
+    };
+
+    // --- Render comments to the DOM ---
+    const renderComments = () => {
+      commentsList.innerHTML = '';
+      comments.forEach(({ id, name, body }) => {
+        const commentItem = document.createElement('div');
+        commentItem.className = 'comment-item';
+        commentItem.innerHTML = `
+          <div class="comment-header">
+            <span class="comment-name">${name}</span>
+            <button class="delete-btn" data-id="${id}">Delete</button>
+          </div>
+          <div class="comment-body">${body}</div>
+        `;
+        commentsList.appendChild(commentItem);
+      });
+    };
+
+    // --- Handle form submission ---
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = nameInput.value.trim();
+      const body = commentInput.value.trim();
+
+      if (!name || !body) return;
+
+      const newComment = {
+        id: Date.now(),
+        name,
+        body
+      };
+
+      comments = [newComment, ...comments];
+      renderComments();
+      saveComments();
+      form.reset();
+    });
+
+    // --- Handle delete (event delegation) ---
+    commentsList.addEventListener('click', (e) => {
+      if (e.target.classList.contains('delete-btn')) {
+        const id = Number(e.target.dataset.id);
+        comments = comments.filter(comment => comment.id !== id);
+        renderComments();
+        saveComments();
+      }
+    });
+
+    // --- Sample English posts (realistic blog content) ---
+    const samplePosts = [
+      { id: 1, title: "Getting Started with Web Development", body: "Web development is an exciting journey. Start with HTML for structure, CSS for styling, and JavaScript for interactivity. This post covers the basics to kickstart your learning." },
+      { id: 2, title: "Why JavaScript is Essential", body: "JavaScript powers modern websites, from dynamic forms to real-time updates. Learn how it works and why it’s a must-have skill for developers." },
+      { id: 3, title: "Using APIs to Enhance Your Site", body: "APIs let you fetch data like blog posts or user info. This post explores how to integrate APIs using JavaScript’s Fetch API." },
+      { id: 4, title: "Tips for Better Coding", body: "Write cleaner code with these tips: use meaningful variable names, keep functions small, and comment your code for clarity." },
+      { id: 5, title: "Building Your First Blog", body: "Create a blog with HTML, CSS, and JavaScript. This guide walks you through setting up a page, adding posts, and enabling comments." }
+    ];
+
+    // --- Fetch posts from JSONPlaceholder (mapped to English) ---
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+        const data = await res.json();
+        // Map API data to realistic English posts
+        return data.map((post, index) => ({
+          id: post.id,
+          title: samplePosts[index].title,
+          body: samplePosts[index].body
+        }));
+      } catch (err) {
+        console.error('Failed to fetch posts:', err);
+        postsContainer.innerHTML = '<p>Sorry, we couldn’t load the posts. Please try again later.</p>';
+        return [];
+      }
+    };
+
+    // --- Render posts to the DOM ---
+    const renderPosts = (posts) => {
+      postsContainer.innerHTML = '';
+      posts.forEach(({ id, title, body }) => {
+        const postItem = document.createElement('div');
+        postItem.className = 'post-item';
+        postItem.innerHTML = `
+          <h2 class="post-title">${title}</h2>
+          <p class="post-body">${body}</p>
+        `;
+        postsContainer.appendChild(postItem);
+      });
+    };
+
+    // --- Sample English comments (realistic blog comments) ---
+    const sampleComments = [
+      { id: 1, name: "Alex", body: "Awesome post! I’m new to web dev, and this really helped me understand the basics." },
+      { id: 2, name: "Maya", body: "Thanks for explaining JavaScript so clearly. Can you do a post on async functions next?" },
+      { id: 3, name: "Jordan", body: "The API section was super helpful. I got my first API call working!" },
+      { id: 4, name: "Sam", body: "Great tips on coding. I’m going to try renaming my variables to be more descriptive." },
+      { id: 5, name: "Taylor", body: "This blog-building guide is fantastic. I’m excited to add comments to my own site!" }
+    ];
+
+    // --- Fetch sample comments from API (mapped to English) ---
+    const fetchSampleComments = async () => {
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/comments?_limit=5');
+        const data = await res.json();
+        // Map API data to realistic English comments
+        return data.map((comment, index) => ({
+          id: comment.id,
+          name: sampleComments[index].name,
+          body: sampleComments[index].body
+        }));
+      } catch (err) {
+        console.error('Failed to fetch sample comments:', err);
+        return [];
+      }
+    };
+
+    // --- Initialize app ---
+    const init = async () => {
+      comments = loadComments();
+      const posts = await fetchPosts();
+      renderPosts(posts);
+      if (comments.length === 0) {
+        const sampleComments = await fetchSampleComments();
+        comments = sampleComments;
+        saveComments();
+      }
+      renderComments();
+    };
+
+    // Run on page load
+    init();
+  </script>
+</body>
+</html>
